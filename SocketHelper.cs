@@ -10,13 +10,13 @@ namespace GMS_CSharp_Server
             public Thread AbortThread;
             public System.Net.Sockets.TcpClient MscClient;
             public Server ParentServer;
-            public string ClientIPAddress;
-            public string ClientName;
-            public string ClientDeck;
-            public int ClientNumber;
+            public string ClientIPAddress = "";
+            public string ClientName = "";
+            public string ClientDeck = "";
+            public int ClientNumber = 0;
             public Lobby GameLobby;
-            public bool IsSearching;
-            public bool IsIngame;
+            public bool IsSearching = false;
+            public bool IsIngame = false;
             int BufferSize = Server.BufferSize;
             int BufferAlignment = Server.BufferAlignment;
             public int HandSize = 0;
@@ -87,7 +87,7 @@ namespace GMS_CSharp_Server
                         UInt16 constant_out = 1010;
                         buffer.Write(constant_out);
                         opponet.SendMessage(buffer);
-                        Console.WriteLine(ClientIPAddress + " is ingame. Granting win to opponent.");
+                        Console.WriteLine(ClientName + " is ingame. Granting win to opponent.");
 
                         //Remove lobby from server.
                         ParentServer.Lobbies.Remove(GameLobby);
@@ -334,33 +334,7 @@ namespace GMS_CSharp_Server
                                     break;
                                 }
 
-                            //Recive Move Input
-                            case 2003:
-                                {
-                                    //Read buffer data.
-                                    String name;
-                                    UInt32 input;
-                                    UInt16 xx;
-                                    UInt16 yy;
-                                    readBuffer.Read(out name);
-                                    readBuffer.Read(out input);
-                                    readBuffer.Read(out xx);
-                                    readBuffer.Read(out yy);
-
-                                    //Send start game to clients.
-                                    BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
-                                    buffer.Seek(0);
-                                    UInt16 constant_out = 1004;
-                                    buffer.Write(constant_out);
-                                    buffer.Write(name);
-                                    buffer.Write(input);
-                                    buffer.Write(xx);
-                                    buffer.Write(yy);
-                                    ParentServer.SendToLobby(GameLobby, buffer);
-                                    Console.WriteLine("Recived input at " + Convert.ToString(xx) + "," + Convert.ToString(yy) + " from " + ClientIPAddress);
-                                    break;
-                                }
-
+                            
                             //Recive client ping.
                             case 2004:
                                 {
