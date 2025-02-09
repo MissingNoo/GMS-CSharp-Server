@@ -20,7 +20,7 @@ namespace GMS_CSharp_Server
             int BufferSize = Server.BufferSize;
             int BufferAlignment = Server.BufferAlignment;
             public int HandSize = 0;
-            public String TalentCard = "undefined";
+            public string TalentCard = "undefined";
             /// <summary>
             /// Starts the given client in two threads for reading and writing.
             /// </summary>
@@ -72,7 +72,7 @@ namespace GMS_CSharp_Server
                     //Find opposing client.
                     try
                     {
-                        SocketHelper opponet = null;
+                        SocketHelper? opponet = null;
                         foreach (SocketHelper lobbyClient in GameLobby.LobbyClients)
                         {
                             if (lobbyClient != this)
@@ -104,7 +104,7 @@ namespace GMS_CSharp_Server
                 ParentServer.Clients.Remove(this);
                 if (IsSearching)
                 {
-                    Console.WriteLine(ClientIPAddress + " was searching for a game. Stopped searching.");
+                    Console.WriteLine(ClientName + " was searching for a game. Stopped searching.");
                     ParentServer.SearchingClients.Remove(this);
                     IsSearching = false;
                 }

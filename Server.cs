@@ -10,6 +10,10 @@ namespace GMS_CSharp_Server
 {
     public class Server
     {
+        public static void log(string text) 
+        {
+            Console.WriteLine("[" + DateTime.Now.ToString() + "] " + text);
+        }
         public List<Lobby> Lobbies;
         public List<SocketHelper> Clients;
         public List<SocketHelper> SearchingClients;
@@ -38,7 +42,7 @@ namespace GMS_CSharp_Server
                 Listen(tcpPort);
             }));
             TCPThread.Start();
-            Console.WriteLine("Listen thread started.");
+            log("Listen thread started.");
 
             //Starts a ping thread to keep connection alive.
             PingThread = new Thread(new ThreadStart(delegate
@@ -149,8 +153,8 @@ namespace GMS_CSharp_Server
                 Thread.Sleep(10);
                 bool match_made = false;
                 bool should_break = false;
-                SocketHelper client_to_remove_1 = null;
-                SocketHelper client_to_remove_2 = null;
+                SocketHelper? client_to_remove_1 = null;
+                SocketHelper? client_to_remove_2 = null;
 
                 //Finds a match for clients.
                 foreach (SocketHelper client1 in SearchingClients)
@@ -198,7 +202,7 @@ namespace GMS_CSharp_Server
                 }
 
                 //Check if match was made.
-                if (match_made)
+                if (match_made && client_to_remove_1 != null && client_to_remove_2 != null)
                 {
                     SearchingClients.Remove(client_to_remove_1);
                     SearchingClients.Remove(client_to_remove_2);
