@@ -38,7 +38,7 @@ namespace GMS_CSharp_Server
                     Read(client);
                 }));
                 ReadThread.Start();
-                Console.WriteLine("Client read thread started.");
+                Server.log("Client read thread started.");
 
                 //Starts a write thread.
                 WriteThread = new Thread(new ThreadStart(delegate
@@ -46,7 +46,7 @@ namespace GMS_CSharp_Server
                     Write(client);
                 }));
                 WriteThread.Start();
-                Console.WriteLine("Client write thread started.");
+                Server.log("Client write thread started.");
             }
 
             /// <summary>
@@ -55,7 +55,14 @@ namespace GMS_CSharp_Server
             /// </summary>
             public void SendMessage(BufferStream buffer)
             {
-                WriteQueue.Enqueue(buffer);
+                try
+                {
+                    WriteQueue.Enqueue(buffer);
+                }
+                catch (System.Exception)
+                {
+                    //do nothing
+                }
             }
 
             /// <summary>
@@ -64,7 +71,7 @@ namespace GMS_CSharp_Server
             public void DisconnectClient()
             {
                 //Console Message.
-                Console.WriteLine("Disconnecting: " + ClientIPAddress);
+                Server.log("Disconnecting: " + ClientName);
 
                 //Check if client is ingame.
                 if (IsIngame)
@@ -87,16 +94,16 @@ namespace GMS_CSharp_Server
                         UInt16 constant_out = 1010;
                         buffer.Write(constant_out);
                         opponet.SendMessage(buffer);
-                        Console.WriteLine(ClientName + " is ingame. Granting win to opponent.");
+                        Server.log(ClientName + " is ingame. Granting win to opponent.");
 
                         //Remove lobby from server.
                         ParentServer.Lobbies.Remove(GameLobby);
                         GameLobby = null;
                         IsIngame = false;
                     }
-                    catch (System.Exception)
+                    catch (Exception)
                     {
-                        
+                        //do nothing
                     }
                 }
 
@@ -104,20 +111,28 @@ namespace GMS_CSharp_Server
                 ParentServer.Clients.Remove(this);
                 if (IsSearching)
                 {
-                    Console.WriteLine(ClientName + " was searching for a game. Stopped searching.");
+                    Server.log(ClientName + " was searching for a game. Stopped searching.");
                     ParentServer.SearchingClients.Remove(this);
                     IsSearching = false;
                 }
 
                 //Closes Stream.
-                MscClient.Close();
+                try 
+                {
+                    MscClient.Close();
+                }
+                catch (Exception)
+                {
+                    //do nothing
+                }
+                
 
                 //Starts an abort thread.
                 AbortThread = new Thread(new ThreadStart(delegate
                 {
                     Abort();
                 }));
-                Console.WriteLine("Aborting threads on client.");
+                Server.log("Aborting threads on client.");
                 AbortThread.Start();
             }
 
@@ -130,16 +145,16 @@ namespace GMS_CSharp_Server
                 {
                     //Stops Threads
                     ReadThread.Interrupt();
-                    //Console.WriteLine("Read thread aborted on client.");
+                    //Server.log("Read thread aborted on client.");
                     WriteThread.Interrupt();
-                    //Console.WriteLine("Write thread aborted on client.");
-                    Console.WriteLine(ClientName + " disconnected.");
-                    Console.WriteLine(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
+                    //Server.log("Write thread aborted on client.");
+                    Server.log(ClientName + " disconnected.");
+                    Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
                     AbortThread.Interrupt();
                 }
                 catch (System.Exception)
                 {
-                    Console.WriteLine("Some error ocurred on user disconnect");
+                    Server.log("Some error ocurred on user disconnect");
                 }
             }
 
@@ -210,7 +225,7 @@ namespace GMS_CSharp_Server
                                 readBuffer.Read(out lname);
                                 lobby.SetupLobby(lname, this);
                                 ParentServer.Lobbies.Add(lobby);
-                                Console.WriteLine("Created Lobby " + lobby.Name);
+                                Server.log("Created Lobby " + lobby.Name);
                                 BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
                                 buffer.Seek(0);
                                 UInt16 constant_out = 1;
@@ -236,7 +251,7 @@ namespace GMS_CSharp_Server
                                 }
                                 buffer.Write(LobbyNames);
                                 SendMessage(buffer);
-                                Console.WriteLine("Sent Lobby list to client");
+                                Server.log("Sent Lobby list to client");
                                 break;
                             }
                             case 4:
@@ -247,7 +262,7 @@ namespace GMS_CSharp_Server
                                 {
                                     if (lobby.Name.Equals(lobby_name))
                                     {
-                                        Console.WriteLine(ClientName + " Joined " + lobby_name);
+                                        Server.log(ClientName + " Joined " + lobby_name);
                                         lobby.AddClient(this);
                                     }
                                 }
@@ -261,7 +276,7 @@ namespace GMS_CSharp_Server
                                 UInt16 constant_out = 5;
                                 buffer.Write(constant_out);
                                 buffer.Write(TalentCard);
-                                Console.WriteLine(ClientName + ":" + ClientNumber.ToString() + " set talent to " + TalentCard);
+                                Server.log(ClientName + ":" + ClientNumber.ToString() + " set talent to " + TalentCard);
                                 foreach (var other in GameLobby.LobbyClients)
                                 {
                                     if (ClientName != other.ClientName)
@@ -280,7 +295,7 @@ namespace GMS_CSharp_Server
                                 UInt16 constant_out = 6;
                                 buffer.Write(constant_out);
                                 buffer.Write(PlayedCard);
-                                Console.WriteLine(ClientName + ":" + ClientNumber.ToString() + " played " + PlayedCard);
+                                Server.log(ClientName + ":" + ClientNumber.ToString() + " played " + PlayedCard);
                                 foreach (var other in GameLobby.LobbyClients)
                                 {
                                     if (ClientName != other.ClientName)
@@ -301,8 +316,8 @@ namespace GMS_CSharp_Server
                                     ClientName = name;
 
                                     //Console Message.
-                                    Console.WriteLine(name + " connected.");
-                                    Console.WriteLine(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
+                                    Server.log(name + " connected.");
+                                    Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
                                     break;
                                 }
 
@@ -314,7 +329,7 @@ namespace GMS_CSharp_Server
 
                                     //Add client to searching clients.
                                     ParentServer.SearchingClients.Add(this);
-                                    Console.WriteLine(ClientName + " is searching for a game");
+                                    Server.log(ClientName + " is searching for a game");
                                     break;
                                 }
 
@@ -330,7 +345,7 @@ namespace GMS_CSharp_Server
 
                                     //Removes client from searching list.
                                     ParentServer.SearchingClients.Remove(this);
-                                    Console.WriteLine(ip + " stopped searching.");
+                                    Server.log(ip + " stopped searching.");
                                     break;
                                 }
 
@@ -377,12 +392,12 @@ namespace GMS_CSharp_Server
                                     UInt16 constant_out = 1006;
                                     buffer.Write(constant_out);
                                     ParentServer.SendToLobby(GameLobby, buffer);
-                                    Console.WriteLine("Recived end turn from " + ClientIPAddress);
+                                    Server.log("Recived end turn from " + ClientName);
                                     break;
                                 }
                         }
                     }
-                    catch (System.IO.IOException)
+                    catch (IOException)
                     {
                         DisconnectClient();
                         break;

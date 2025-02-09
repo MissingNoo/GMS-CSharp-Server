@@ -12,7 +12,7 @@ namespace GMS_CSharp_Server
     {
         public static void log(string text) 
         {
-            Console.WriteLine("[" + DateTime.Now.ToString() + "] " + text);
+            Console.WriteLine("[" + DateTime.Now.ToString().Split(" ")[1] + "] " + text);
         }
         public List<Lobby> Lobbies;
         public List<SocketHelper> Clients;
@@ -50,7 +50,7 @@ namespace GMS_CSharp_Server
                 Ping();
             }));
             PingThread.Start();
-            Console.WriteLine("Ping thread started.");
+            log("Ping thread started.");
 
             //Starts a matchmaking thread to create lobbies.
             MatchmakingThread = new Thread(new ThreadStart(delegate
@@ -58,7 +58,7 @@ namespace GMS_CSharp_Server
                 Matchmaking();
             }));
             MatchmakingThread.Start();
-            Console.WriteLine("Matchmaking thread started.");
+            log("Matchmaking thread started.");
         }
 
         /// <summary>
@@ -92,12 +92,19 @@ namespace GMS_CSharp_Server
             //Send ping to clients every 3 seconds.
             while (true)
             {
-                Thread.Sleep(3000);
-                BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
-                buffer.Seek(0);
-                ushort constant_out = 1007;
-                buffer.Write(constant_out);
-                SendToAllClients(buffer);
+                try
+                {
+                    Thread.Sleep(3000);
+                    BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
+                    buffer.Seek(0);
+                    ushort constant_out = 1007;
+                    buffer.Write(constant_out);
+                    SendToAllClients(buffer);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Error");
+                }
             }
         }
 
@@ -135,7 +142,7 @@ namespace GMS_CSharp_Server
             {
                 Thread.Sleep(10);
                 TcpClient tcpClient = TCPListener.AcceptTcpClient();
-                Console.WriteLine("New client detected. Connecting client.");
+                log("New client detected. Connecting client.");
                 SocketHelper helper = new SocketHelper();
                 helper.StartClient(tcpClient, this);
                 Clients.Add(helper);
@@ -189,7 +196,7 @@ namespace GMS_CSharp_Server
                             //SendToLobby(lobby, buffer);
                             string name_1 = client1.ClientName;
                             string name_2 = client2.ClientName;
-                            Console.WriteLine("Matchmade between " + name_1 + " and " + name_2);
+                            log("Matchmade between " + name_1 + " and " + name_2);
                             break;
                         }
                     }
