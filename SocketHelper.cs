@@ -1,7 +1,14 @@
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace GMS_CSharp_Server
 {
+    public class PlayerData {
+        public string Name { get; set; }
+        public string Playmat { get; set; }
+        public string Deck { get; set; }
+        public float Portrait { get; set; }
+    }
     public class SocketHelper
         {
             Queue<BufferStream> WriteQueue = new Queue<BufferStream>();
@@ -10,9 +17,7 @@ namespace GMS_CSharp_Server
             public Thread AbortThread;
             public System.Net.Sockets.TcpClient MscClient;
             public Server ParentServer;
-            public string ClientIPAddress = "";
             public string ClientName = "";
-            public string ClientDeck = "";
             public int ClientNumber = 0;
             public Lobby GameLobby;
             public bool IsSearching = false;
@@ -21,6 +26,7 @@ namespace GMS_CSharp_Server
             int BufferAlignment = Server.BufferAlignment;
             public int HandSize = 0;
             public string TalentCard = "undefined";
+            public PlayerData? playerData;
             /// <summary>
             /// Starts the given client in two threads for reading and writing.
             /// </summary>
@@ -165,7 +171,12 @@ namespace GMS_CSharp_Server
             {
                 while (true)
                 {
-                    Thread.Sleep(10);
+                    try
+                    {
+                        Thread.Sleep(10);
+                    }
+                    catch (System.Exception){}
+                    
                     if (WriteQueue.Count != 0)
                     {
                         try
@@ -175,7 +186,7 @@ namespace GMS_CSharp_Server
                             stream.Write(buffer.Memory, 0, buffer.Iterator);
                             stream.Flush();
                         }
-                        catch (System.IO.IOException)
+                        catch (IOException)
                         {
                             DisconnectClient();
                             break;
@@ -308,16 +319,21 @@ namespace GMS_CSharp_Server
                             //New Connection
                             case 2000:
                                 {
-                                    //Read out client data.
-                                    String name;
-                                    readBuffer.Read(out name);
+                                    try
+                                    {
+                                        readBuffer.Read(out string json);
+                                        Server.log(json);
+                                        playerData = JsonSerializer.Deserialize<PlayerData>(json);
+                                        ClientName = playerData.Name;
 
-                                    //Update client information.
-                                    ClientName = name;
-
-                                    //Console Message.
-                                    Server.log(name + " connected.");
-                                    Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
+                                        Server.log(ClientName + " connected.");
+                                        Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
+                                    }
+                                    catch (Exception)
+                                    {
+                                        
+                                    }
+                                    
                                     break;
                                 }
 

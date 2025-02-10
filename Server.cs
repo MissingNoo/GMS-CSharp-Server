@@ -5,6 +5,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Text.Json;
 
 namespace GMS_CSharp_Server
 {
@@ -189,10 +190,25 @@ namespace GMS_CSharp_Server
                             buffer.Seek(0);
                             UInt16 constant = 7;//StartGame
                             buffer.Write(constant);
+                            
                             foreach (var client in lobby.LobbyClients)
                             {
                                 client.SendMessage(buffer);
                             }
+                            //Other Player Info
+                            buffer = new BufferStream(BufferSize, BufferAlignment);
+                            buffer.Seek(0);
+                            constant = 9;//PlayerInfo
+                            buffer.Write(constant);
+                            buffer.Write(JsonSerializer.Serialize(lobby.LobbyClients[1].playerData));
+                            lobby.LobbyClients[0].SendMessage(buffer);
+
+                            buffer = new BufferStream(BufferSize, BufferAlignment);
+                            buffer.Seek(0);
+                            constant = 9;//PlayerInfo
+                            buffer.Write(constant);
+                            buffer.Write(JsonSerializer.Serialize(lobby.LobbyClients[0].playerData));
+                            lobby.LobbyClients[1].SendMessage(buffer);
                             //SendToLobby(lobby, buffer);
                             string name_1 = client1.ClientName;
                             string name_2 = client2.ClientName;
