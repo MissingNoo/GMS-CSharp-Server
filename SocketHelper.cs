@@ -399,13 +399,13 @@ namespace GMS_CSharp_Server
                                     break;
                                 }
 
-                            // 7 = Recive End Turn
-                            case 2007:
+                            // 10 = NextTurn
+                            case 10:
                                 {
                                     //Send end turn input to clients.
                                     BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
                                     buffer.Seek(0);
-                                    UInt16 constant_out = 1006;
+                                    UInt16 constant_out = 10;
                                     buffer.Write(constant_out);
                                     ParentServer.SendToLobby(GameLobby, buffer);
                                     Server.log("Recived end turn from " + ClientName);

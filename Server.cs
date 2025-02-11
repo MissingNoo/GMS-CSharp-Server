@@ -100,6 +100,8 @@ namespace GMS_CSharp_Server
                     buffer.Seek(0);
                     ushort constant_out = 1007;
                     buffer.Write(constant_out);
+                    UInt16 online = (UInt16)Clients.Count;                                    
+                    buffer.Write(online);
                     SendToAllClients(buffer);
                 }
                 catch (Exception)
