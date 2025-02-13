@@ -281,13 +281,13 @@ namespace GMS_CSharp_Server
                             }
                             case 5:
                             {
-                                readBuffer.Read(out TalentCard);
+                                readBuffer.Read(out UInt16 TalentCard);
                                 BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
                                 buffer.Seek(0);
                                 UInt16 constant_out = 5;
                                 buffer.Write(constant_out);
                                 buffer.Write(TalentCard);
-                                Server.log(ClientName + ":" + ClientNumber.ToString() + " set talent to " + TalentCard);
+                                Server.log(ClientName + ":" + ClientNumber.ToString() + " set talent to " + TalentCard.ToString());
                                 foreach (var other in GameLobby.LobbyClients)
                                 {
                                     if (ClientName != other.ClientName)
@@ -299,14 +299,13 @@ namespace GMS_CSharp_Server
                             }
                             case 6:
                             {
-                                String PlayedCard;
-                                readBuffer.Read(out PlayedCard);
+                                readBuffer.Read(out UInt16 PlayedCard);
                                 BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
                                 buffer.Seek(0);
                                 UInt16 constant_out = 6;
                                 buffer.Write(constant_out);
                                 buffer.Write(PlayedCard);
-                                Server.log(ClientName + ":" + ClientNumber.ToString() + " played " + PlayedCard);
+                                Server.log(ClientName + ":" + ClientNumber.ToString() + " played " + PlayedCard.ToString());
                                 foreach (var other in GameLobby.LobbyClients)
                                 {
                                     if (ClientName != other.ClientName)
