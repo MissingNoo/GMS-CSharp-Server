@@ -165,7 +165,7 @@ namespace GMS_CSharp_Server
                     //Finds a match for clients.
                     foreach (SocketHelper client2 in SearchingClients)
                     {
-                        if (client1.ClientName != client2.ClientName)
+                        if (client1.ClientName != client2.ClientName && client1.playerData.Version == client2.playerData.Version)
                         {
                             //Create a lobby.
                             Lobby lobby = new Lobby();

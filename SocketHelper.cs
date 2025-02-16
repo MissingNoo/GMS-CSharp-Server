@@ -8,6 +8,7 @@ namespace GMS_CSharp_Server
         public string Playmat { get; set; }
         public string Deck { get; set; }
         public float Portrait { get; set; }
+        public string Version { get; set; }
     }
     public class SocketHelper
         {
