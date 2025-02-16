@@ -61,14 +61,7 @@ namespace GMS_CSharp_Server
             /// </summary>
             public void SendMessage(BufferStream buffer)
             {
-                try
-                {
-                    WriteQueue.Enqueue(buffer);
-                }
-                catch (System.Exception)
-                {
-                    //do nothing
-                }
+                WriteQueue.Enqueue(buffer);
             }
 
             /// <summary>
@@ -83,56 +76,40 @@ namespace GMS_CSharp_Server
                 if (IsIngame)
                 {
                     //Find opposing client.
-                    try
+                    SocketHelper? opponet = null;
+                    foreach (SocketHelper lobbyClient in GameLobby.LobbyClients)
                     {
-                        SocketHelper? opponet = null;
-                        foreach (SocketHelper lobbyClient in GameLobby.LobbyClients)
+                        if (lobbyClient != this)
                         {
-                            if (lobbyClient != this)
-                            {
-                                opponet = lobbyClient;
-                            }
+                            opponet = lobbyClient;
                         }
-                        
-                        //Causes opponent to win.
-                        BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
-                        buffer.Seek(0);
-                        UInt16 constant_out = 1010;
-                        buffer.Write(constant_out);
-                        opponet.SendMessage(buffer);
-                        Server.log(ClientName + " is ingame. Granting win to opponent.");
-
-                        //Remove lobby from server.
-                        ParentServer.Lobbies.Remove(GameLobby);
-                        GameLobby = null;
-                        IsIngame = false;
                     }
-                    catch (Exception)
-                    {
-                        //do nothing
-                    }
-                }
-                
-                try 
-                {
-                    //Removes client from server.
-                    ParentServer.Clients.Remove(this);
-                    if (IsSearching)
-                    {
-                        Server.log(ClientName + " was searching for a game. Stopped searching.");
-                        ParentServer.SearchingClients.Remove(this);
-                        IsSearching = false;
-                    }
-
-                    //Closes Stream.
                     
-                    MscClient.Close();
-                }
-                catch (Exception)
-                {
-                    //do nothing
+                    //Causes opponent to win.
+                    BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
+                    buffer.Seek(0);
+                    UInt16 constant_out = 1010;
+                    buffer.Write(constant_out);
+                    opponet.SendMessage(buffer);
+                    Server.log(ClientName + " is ingame. Granting win to opponent.");
+
+                    //Remove lobby from server.
+                    ParentServer.Lobbies.Remove(GameLobby);
+                    GameLobby = null;
+                    IsIngame = false;
                 }
                 
+                //Removes client from server.
+                ParentServer.Clients.Remove(this);
+                if (IsSearching)
+                {
+                    Server.log(ClientName + " was searching for a game. Stopped searching.");
+                    ParentServer.SearchingClients.Remove(this);
+                    IsSearching = false;
+                }
+
+                //Closes Stream.
+                MscClient.Close();
 
                 //Starts an abort thread.
                 AbortThread = new Thread(new ThreadStart(delegate
@@ -148,21 +125,15 @@ namespace GMS_CSharp_Server
             /// </summary>
             public void Abort()
             {
-                try
-                {
-                    //Stops Threads
-                    ReadThread.Interrupt();
-                    //Server.log("Read thread aborted on client.");
-                    WriteThread.Interrupt();
-                    //Server.log("Write thread aborted on client.");
-                    Server.log(ClientName + " disconnected.");
-                    Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
-                    AbortThread.Interrupt();
-                }
-                catch (Exception)
-                {
-                    Server.log("Some error ocurred on user disconnect");
-                }
+                
+                //Stops Threads
+                ReadThread.Interrupt();
+                //Server.log("Read thread aborted on client.");
+                WriteThread.Interrupt();
+                //Server.log("Write thread aborted on client.");
+                Server.log(ClientName + " disconnected.");
+                Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
+                AbortThread.Interrupt();
             }
 
             /// <summary>
@@ -172,12 +143,8 @@ namespace GMS_CSharp_Server
             {
                 while (true)
                 {
-                    try
-                    {
-                        Thread.Sleep(10);
-                    }
-                    catch (System.Exception){}
-                    
+                    Thread.Sleep(10);
+                                     
                     if (WriteQueue.Count != 0)
                     {
                         try
@@ -187,12 +154,7 @@ namespace GMS_CSharp_Server
                             stream.Write(buffer.Memory, 0, buffer.Iterator);
                             stream.Flush();
                         }
-                        catch (Exception)
-                        {
-                            DisconnectClient();
-                            break;
-                        }
-                        /*catch (IOException)
+                        catch (IOException)
                         {
                             DisconnectClient();
                             break;
@@ -204,12 +166,12 @@ namespace GMS_CSharp_Server
                         }
                         catch (ObjectDisposedException)
                         {
-                            //break;
+                            break;
                         }
                         catch (InvalidOperationException)
                         {
-                            //break;
-                        }*/
+                            break;
+                        }
                     }
                 }
             }
@@ -336,9 +298,8 @@ namespace GMS_CSharp_Server
                                     }
                                     catch (Exception)
                                     {
-                                        
+                                        Server.log("Invalid player");
                                     }
-                                    
                                     break;
                                 }
 
@@ -430,12 +391,10 @@ namespace GMS_CSharp_Server
                     }
                     catch (ObjectDisposedException)
                     {
-                        //Do nothing.
                         break;
                     }
                     catch (InvalidOperationException)
                     {
-                        //Do nothing.
                         break;
                     }
                 }

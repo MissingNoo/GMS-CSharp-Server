@@ -92,22 +92,15 @@ namespace GMS_CSharp_Server
         {
             //Send ping to clients every 3 seconds.
             while (true)
-            {
-                try
-                {
-                    Thread.Sleep(3000);
-                    BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
-                    buffer.Seek(0);
-                    ushort constant_out = 1007;
-                    buffer.Write(constant_out);
-                    UInt16 online = (UInt16)Clients.Count;                                    
-                    buffer.Write(online);
-                    SendToAllClients(buffer);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Error");
-                }
+            {            
+                Thread.Sleep(3000);
+                BufferStream buffer = new BufferStream(BufferSize, BufferAlignment);
+                buffer.Seek(0);
+                ushort constant_out = 1007;
+                buffer.Write(constant_out);
+                UInt16 online = (UInt16)Clients.Count;                                    
+                buffer.Write(online);
+                SendToAllClients(buffer);            
             }
         }
 
