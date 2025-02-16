@@ -112,19 +112,20 @@ namespace GMS_CSharp_Server
                         //do nothing
                     }
                 }
-
-                //Removes client from server.
-                ParentServer.Clients.Remove(this);
-                if (IsSearching)
-                {
-                    Server.log(ClientName + " was searching for a game. Stopped searching.");
-                    ParentServer.SearchingClients.Remove(this);
-                    IsSearching = false;
-                }
-
-                //Closes Stream.
+                
                 try 
                 {
+                    //Removes client from server.
+                    ParentServer.Clients.Remove(this);
+                    if (IsSearching)
+                    {
+                        Server.log(ClientName + " was searching for a game. Stopped searching.");
+                        ParentServer.SearchingClients.Remove(this);
+                        IsSearching = false;
+                    }
+
+                    //Closes Stream.
+                    
                     MscClient.Close();
                 }
                 catch (Exception)
@@ -158,7 +159,7 @@ namespace GMS_CSharp_Server
                     Server.log(Convert.ToString(ParentServer.Clients.Count) + " clients online.");
                     AbortThread.Interrupt();
                 }
-                catch (System.Exception)
+                catch (Exception)
                 {
                     Server.log("Some error ocurred on user disconnect");
                 }
@@ -186,7 +187,12 @@ namespace GMS_CSharp_Server
                             stream.Write(buffer.Memory, 0, buffer.Iterator);
                             stream.Flush();
                         }
-                        catch (IOException)
+                        catch (Exception)
+                        {
+                            DisconnectClient();
+                            break;
+                        }
+                        /*catch (IOException)
                         {
                             DisconnectClient();
                             break;
@@ -198,12 +204,12 @@ namespace GMS_CSharp_Server
                         }
                         catch (ObjectDisposedException)
                         {
-                            break;
+                            //break;
                         }
                         catch (InvalidOperationException)
                         {
-                            break;
-                        }
+                            //break;
+                        }*/
                     }
                 }
             }
