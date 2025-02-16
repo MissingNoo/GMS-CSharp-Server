@@ -226,7 +226,7 @@ namespace GMS_CSharp_Server
                         Thread.Sleep(10);
                         BufferStream readBuffer = new BufferStream(BufferSize, 1);
                         NetworkStream stream = client.GetStream();
-                        stream.Read(readBuffer.Memory, 0, BufferSize);
+                        stream.ReadExactly(readBuffer.Memory, 0, BufferSize);
 
                         //Read the header data.
                         ushort constant;
